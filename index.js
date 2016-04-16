@@ -1,7 +1,7 @@
 var app = require('app');
 var fs = require('fs');
 var path = require('path');
-var jade = require('jade');
+var pug = require('pug');
 var extend = require('util')._extend;
 var mime = require('mime');
 
@@ -10,7 +10,7 @@ var getPath = function(url) {
   var result = parsed.pathname;
 
   // Local files in windows start with slash if no host is given
-  // file:///c:/something.jade
+  // file:///c:/something.pug
   if(process.platform === 'win32' && !parsed.host.trim()) {
     result = result.substr(1);
   }
@@ -18,10 +18,10 @@ var getPath = function(url) {
   return result;
 }
 
-module.exports = function(jadeOptions, locals) {
+module.exports = function(pugOptions, locals) {
   app.on('ready', function() {
     var protocol = require('protocol');
-    var options = extend({}, jadeOptions || {});
+    var options = extend({}, pugOptions || {});
 
     protocol.interceptBufferProtocol('file', function(request, callback) {
       var file = getPath(request.url);
@@ -32,8 +32,8 @@ module.exports = function(jadeOptions, locals) {
         content = fs.readFileSync(file);
 
         var ext = path.extname(file);
-        if (ext === '.jade') {
-          var compiled = jade.compileFile(file, jadeOptions)(locals);
+        if (ext === '.pug') {
+          var compiled = pug.compileFile(file, pugOptions)(locals);
 
           return callback({data: new Buffer(compiled), mimeType:'text/html'});
         } else {
@@ -53,9 +53,9 @@ module.exports = function(jadeOptions, locals) {
       }
     }, function (error, scheme) {
       if (!error) {
-        console.log('Jade interceptor registered successfully');
+        console.log('Pug interceptor registered successfully');
       } else {
-        console.error('Jade interceptor failed:', error);
+        console.error('Pug interceptor failed:', error);
       }
     });
   });
