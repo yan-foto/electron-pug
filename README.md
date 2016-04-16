@@ -1,32 +1,32 @@
-# electron jade
-This module is a simple `file` protocol interceptor for [electron](https://github.com/atom/electron) which compiles all (local) URLs to files with `.jade` extension (e.g `/home/electron-jade/index.jade`) on the fly.
+# electron pug
+This module is a simple `file` protocol interceptor for [electron](https://github.com/atom/electron) which compiles all (local) URLs to files with `.pug` extension (e.g `/home/electron-pug/index.pug`) on the fly.
 
 <a href="https://github.com/yan-foto/neutron"><img alt="Neutron Compatible" src="https://img.shields.io/badge/neutron-compatible-004455.svg"></a>
-<a href="https://www.npmjs.com/package/electron-jade"><img alt="NPM Version" src="https://img.shields.io/npm/v/electron-jade.svg"></a>
-![license](https://img.shields.io/npm/l/electron-jade.svg)
+<a href="https://www.npmjs.com/package/electron-pug"><img alt="NPM Version" src="https://img.shields.io/npm/v/electron-pug.svg"></a>
+![license](https://img.shields.io/npm/l/electron-pug.svg)
 # Installation
 
 ```
-npm install electron-jade
+npm install electron-pug
 ```
 
 # Usage
-Just initialize this module with desired options for [Jade](https://www.npmjs.com/package/jade) package and your locals:
+Just initialize this module with desired options for [Pug](https://www.npmjs.com/package/pug) package and your locals:
 
 ```js
 'use strict';
 
-var app = require('app');
-var locals = {/* ...*/};
-var j = require('electron-jade')({pretty: true}, locals);
-var BrowserWindow = require('browser-window');
+const app = require('app');
+const locals = {/* ...*/};
+const j = require('electron-pug')({pretty: true}, locals);
+const BrowserWindow = require('browser-window');
 
 // Standard stuff
 
 app.on('ready', function () {
-  mainWindow = new BrowserWindow({ width: 800, height: 600 });
+  let mainWindow = new BrowserWindow({ width: 800, height: 600 });
 
-  mainWindow.loadUrl('file://' + __dirname + '/index.jade');
+  mainWindow.loadUrl('file://' + __dirname + '/index.pug');
   // the rest...
 });
 ```
