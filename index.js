@@ -1,4 +1,5 @@
-var app = require('app');
+var electron = require('electron');
+var app = electron.app;
 var fs = require('fs');
 var path = require('path');
 var pug = require('pug');
@@ -20,7 +21,7 @@ var getPath = function(url) {
 
 module.exports = function(pugOptions, locals) {
   app.on('ready', function() {
-    var protocol = require('protocol');
+    var protocol = electron.protocol;
     var options = extend({}, pugOptions || {});
 
     protocol.interceptBufferProtocol('file', function(request, callback) {
