@@ -16,10 +16,9 @@ Just initialize this module with desired options for [Pug](https://www.npmjs.com
 ```js
 'use strict';
 
-const {app} = require('electron');
+const {app, BrowserWindow} = require('electron');
 const locals = {/* ...*/};
 const pug = require('electron-pug')({pretty: true}, locals);
-const BrowserWindow = require('browser-window');
 
 // Standard stuff
 
