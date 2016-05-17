@@ -16,17 +16,16 @@ Just initialize this module with desired options for [Pug](https://www.npmjs.com
 ```js
 'use strict';
 
-const app = require('app');
+const {app, BrowserWindow} = require('electron');
 const locals = {/* ...*/};
-const j = require('electron-pug')({pretty: true}, locals);
-const BrowserWindow = require('browser-window');
+const pug = require('electron-pug')({pretty: true}, locals);
 
 // Standard stuff
 
-app.on('ready', function () {
+app.on('ready', () => {
   let mainWindow = new BrowserWindow({ width: 800, height: 600 });
 
-  mainWindow.loadUrl('file://' + __dirname + '/index.pug');
+  mainWindow.loadUrl(`file://${__dirname}/index.pug`);
   // the rest...
 });
 ```
