@@ -1,6 +1,6 @@
 {
   "name": "electron-pug",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Simple electron module to render Pug (former Jade) templates",
   "main": "index.js",
   "repository": {
