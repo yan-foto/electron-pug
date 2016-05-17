@@ -1,14 +1,28 @@
-var electron = require('electron');
-var app = electron.app;
-var fs = require('fs');
-var path = require('path');
-var pug = require('pug');
-var extend = require('util')._extend;
-var mime = require('mime');
+'use strict';
 
-var getPath = function(url) {
-  var parsed = require('url').parse(url);
-  var result = parsed.pathname;
+const {app, protocol} = require('electron');
+const fs = require('fs');
+const path = require('path');
+const pug = require('pug');
+const {_extend: extend} = require('util');
+const mime = require('mime');
+
+
+/**
+ * Returns path for file from given URL.
+ *
+ * 'url' module is internally used to parse URLs. For *nix file
+ * system URLs 'pathname' of parsed object is used. For Window,
+ * however, local files start with a slash if no host is given
+ * and this functions simply drops that leading slash with no
+ * further complicated logic.
+ *
+ * @param  {String} url URL denoting file
+ * @return {String} path to file
+ */
+const getPath = url => {
+  let parsed = require('url').parse(url);
+  let result = parsed.pathname;
 
   // Local files in windows start with slash if no host is given
   // file:///c:/something.pug
@@ -19,22 +33,35 @@ var getPath = function(url) {
   return result;
 }
 
-module.exports = function(pugOptions, locals) {
-  app.on('ready', function() {
-    var protocol = electron.protocol;
-    var options = extend({}, pugOptions || {});
+/**
+ * Callback handler for 'interceptBufferProtocol'.
+ * It simply logs to output if intercepting the protocol
+ * has succeeded or failed.
+ *
+ * @param {Error} error not undefined if any error happens
+ */
+const interceptCB = error => {
+  if (!error) {
+    console.log('Pug interceptor registered successfully');
+  } else {
+    console.error('Pug interceptor failed:', error);
+  }
+}
 
-    protocol.interceptBufferProtocol('file', function(request, callback) {
-      var file = getPath(request.url);
-      var content = null;
+module.exports = function(pugOptions, locals) {
+  app.on('ready', () => {
+    let options = extend({}, pugOptions || {});
+
+    protocol.interceptBufferProtocol('file', (request, callback) => {
+      let file = getPath(request.url);
 
       // See if file actually exists
       try {
-        content = fs.readFileSync(file);
+        let content = fs.readFileSync(file);
 
-        var ext = path.extname(file);
+        let ext = path.extname(file);
         if (ext === '.pug') {
-          var compiled = pug.compileFile(file, pugOptions)(locals);
+          let compiled = pug.compileFile(file, pugOptions)(locals);
 
           return callback({data: new Buffer(compiled), mimeType:'text/html'});
         } else {
@@ -52,12 +79,6 @@ module.exports = function(pugOptions, locals) {
        // NET_ERROR(FAILED, -2)
        return callback(2);
       }
-    }, function (error, scheme) {
-      if (!error) {
-        console.log('Pug interceptor registered successfully');
-      } else {
-        console.error('Pug interceptor failed:', error);
-      }
-    });
+    }, interceptCB);
   });
 };
