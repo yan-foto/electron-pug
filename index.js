@@ -61,7 +61,13 @@ module.exports = function(pugOptions, locals) {
 
         let ext = path.extname(file);
         if (ext === '.pug') {
-          let compiled = pug.compileFile(file, pugOptions)(locals);
+          let compiled;
+          
+          try {
+            compiled = pug.compileFile(file, pugOptions)(locals);
+          } catch (e) {
+            return callback({data: new Buffer(`<pre style="tab-size:1">${e}</pre>`), mimeType:'text/html'});
+          }
 
           return callback({data: new Buffer(compiled), mimeType:'text/html'});
         } else {
