@@ -22,7 +22,7 @@ const mime = require('mime');
  */
 const getPath = url => {
   let parsed = require('url').parse(url);
-  let result = parsed.pathname;
+  let result = decodeURIComponent(parsed.pathname);
 
   // Local files in windows start with slash if no host is given
   // file:///c:/something.pug
