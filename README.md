@@ -25,7 +25,7 @@ const pug = require('electron-pug')({pretty: true}, locals);
 app.on('ready', () => {
   let mainWindow = new BrowserWindow({ width: 800, height: 600 });
 
-  mainWindow.loadUrl(`file://${__dirname}/index.pug`);
+  mainWindow.loadURL(`file://${__dirname}/index.pug`);
   // the rest...
 });
 ```
