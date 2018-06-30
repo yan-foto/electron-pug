@@ -6,6 +6,8 @@ const path = require('path')
 const pug = require('pug')
 const mime = require('mime')
 
+const HTML_MIME = mime.getType('html')
+
 /**
  * Returns path for file from given URL.
  *
@@ -56,30 +58,29 @@ const setupPug = (pugOptions, locals) => {
     try {
       let content = fs.readFileSync(file)
       let ext = path.extname(file)
+      let data = {data: content, mimeType: mime.getType(ext)}
 
       if (ext === '.pug') {
         let compiled = pug.compileFile(file, options)(locals)
-
-        return result({data: Buffer.from(compiled), mimeType: 'text/html'})
-      } else {
-        return result({data: content, mimeType: mime.getType(ext)})
+        data = {data: Buffer.from(compiled), mimeType: HTML_MIME}
       }
+
+      return result(data)
     } catch (e) {
-      // All error wrt. Pug are rendered in browser
-      if (e.code.startsWith('PUG:')) {
-        return result({data: Buffer.from(`<pre style="tab-size:1">${e}</pre>`), mimeType: 'text/html'})
-      }
-
       // See here for error numbers:
       // https://code.google.com/p/chromium/codesearch#chromium/src/net/base/net_error_list.h
+      let errorData
       if (e.code === 'ENOENT') {
-        // NET_ERROR(FILE_NOT_FOUND, -6)
-        return result(-6)
+        errorData = -6
+      } else if (typeof e.code === 'number') {
+        errorData = -2
+      } else {
+        // Remaining errors are considered to be pug errors
+        // All errors wrt. Pug are rendered in browser
+        errorData = {data: Buffer.from(`<pre style="tab-size:1">${e}</pre>`), mimeType: HTML_MIME}
       }
 
-      // All other possible errors return a generic failure
-      // NET_ERROR(FAILED, -2)
-      return result(-2)
+      return result(errorData)
     }
   }, interceptCB)
 }
