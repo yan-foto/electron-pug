@@ -62,7 +62,7 @@ const setupPug = (pugOptions, locals) => {
 
         return result({data: Buffer.from(compiled), mimeType: 'text/html'})
       } else {
-        return result({data: content, mimeType: mime.lookup(ext)})
+        return result({data: content, mimeType: mime.getType(ext)})
       }
     } catch (e) {
       // All error wrt. Pug are rendered in browser
