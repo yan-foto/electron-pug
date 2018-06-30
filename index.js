@@ -48,42 +48,48 @@ const interceptCB = error => {
   }
 }
 
-module.exports = function(pugOptions, locals) {
-  app.on('ready', () => {
-    let options = extend({}, pugOptions || {});
+const setupPug = (pugOptions, locals) => {
+  let options = extend({}, pugOptions || {});
 
-    protocol.interceptBufferProtocol('file', (request, callback) => {
-      let file = getPath(request.url);
+  protocol.interceptBufferProtocol('file', (request, callback) => {
+    let file = getPath(request.url);
 
-      // See if file actually exists
-      try {
-        let content = fs.readFileSync(file);
+    // See if file actually exists
+    try {
+      let content = fs.readFileSync(file);
 
-        let ext = path.extname(file);
-        if (ext === '.pug') {
-          let compiled = pug.compileFile(file, pugOptions)(locals);
+      let ext = path.extname(file);
+      if (ext === '.pug') {
+        let compiled = pug.compileFile(file, pugOptions)(locals);
 
-          return callback({data: new Buffer(compiled), mimeType:'text/html'});
-        } else {
-          return callback({data: content, mimeType: mime.lookup(ext)});
-        }
-      } catch (e) {
-        // All error wrt. Pug are rendered in browser
-        if (e.code.startsWith('PUG:')) {
-          return callback({data: new Buffer(`<pre style="tab-size:1">${e}</pre>`), mimeType:'text/html'});
-        }
-
-        // See here for error numbers:
-        // https://code.google.com/p/chromium/codesearch#chromium/src/net/base/net_error_list.h
-        if (e.code === 'ENOENT') {
-         // NET_ERROR(FILE_NOT_FOUND, -6)
-         return callback(-6);
-        }
-
-        // All other possible errors return a generic failure
-        // NET_ERROR(FAILED, -2)
-        return callback(-2);
+        return callback({data: new Buffer(compiled), mimeType:'text/html'});
+      } else {
+        return callback({data: content, mimeType: mime.lookup(ext)});
       }
-    }, interceptCB);
-  });
+    } catch (e) {
+      // All error wrt. Pug are rendered in browser
+      if (e.code.startsWith('PUG:')) {
+        return callback({data: new Buffer(`<pre style="tab-size:1">${e}</pre>`), mimeType:'text/html'});
+      }
+
+      // See here for error numbers:
+      // https://code.google.com/p/chromium/codesearch#chromium/src/net/base/net_error_list.h
+      if (e.code === 'ENOENT') {
+        // NET_ERROR(FILE_NOT_FOUND, -6)
+        return callback(-6);
+      }
+
+      // All other possible errors return a generic failure
+      // NET_ERROR(FAILED, -2)
+      return callback(-2);
+    }
+  }, interceptCB);
+}
+
+module.exports = function(pugOptions, locals) {
+  if(app.isReady()) {
+    setupPug(pugOptions, locals);
+  } else {
+    app.on('ready', () => setupPug(pugOptions, locals));
+  }
 };
