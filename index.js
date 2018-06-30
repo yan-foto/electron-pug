@@ -1,12 +1,10 @@
-'use strict';
+'use strict'
 
-const {app, protocol} = require('electron');
-const fs = require('fs');
-const path = require('path');
-const pug = require('pug');
-const {_extend: extend} = require('util');
-const mime = require('mime');
-
+const {app, protocol} = require('electron')
+const fs = require('fs')
+const path = require('path')
+const pug = require('pug')
+const mime = require('mime')
 
 /**
  * Returns path for file from given URL.
@@ -21,16 +19,16 @@ const mime = require('mime');
  * @return {String} path to file
  */
 const getPath = url => {
-  let parsed = require('url').parse(url);
-  let result = decodeURIComponent(parsed.pathname);
+  let parsed = require('url').parse(url)
+  let result = decodeURIComponent(parsed.pathname)
 
   // Local files in windows start with slash if no host is given
   // file:///c:/something.pug
-  if(process.platform === 'win32' && !parsed.host.trim()) {
-    result = result.substr(1);
+  if (process.platform === 'win32' && !parsed.host.trim()) {
+    result = result.substr(1)
   }
 
-  return result;
+  return result
 }
 
 /**
@@ -42,54 +40,54 @@ const getPath = url => {
  */
 const interceptCB = error => {
   if (!error) {
-    console.log('Pug interceptor registered successfully');
+    console.log('Pug interceptor registered successfully')
   } else {
-    console.error('Pug interceptor failed:', error);
+    console.error('Pug interceptor failed:', error)
   }
 }
 
 const setupPug = (pugOptions, locals) => {
-  let options = extend({}, pugOptions || {});
+  let options = Object.assign({}, pugOptions || {})
 
-  protocol.interceptBufferProtocol('file', (request, callback) => {
-    let file = getPath(request.url);
+  protocol.interceptBufferProtocol('file', (request, result) => {
+    let file = getPath(request.url)
 
     // See if file actually exists
     try {
-      let content = fs.readFileSync(file);
+      let content = fs.readFileSync(file)
+      let ext = path.extname(file)
 
-      let ext = path.extname(file);
       if (ext === '.pug') {
-        let compiled = pug.compileFile(file, pugOptions)(locals);
+        let compiled = pug.compileFile(file, options)(locals)
 
-        return callback({data: new Buffer(compiled), mimeType:'text/html'});
+        return result({data: Buffer.from(compiled), mimeType: 'text/html'})
       } else {
-        return callback({data: content, mimeType: mime.lookup(ext)});
+        return result({data: content, mimeType: mime.lookup(ext)})
       }
     } catch (e) {
       // All error wrt. Pug are rendered in browser
       if (e.code.startsWith('PUG:')) {
-        return callback({data: new Buffer(`<pre style="tab-size:1">${e}</pre>`), mimeType:'text/html'});
+        return result({data: Buffer.from(`<pre style="tab-size:1">${e}</pre>`), mimeType: 'text/html'})
       }
 
       // See here for error numbers:
       // https://code.google.com/p/chromium/codesearch#chromium/src/net/base/net_error_list.h
       if (e.code === 'ENOENT') {
         // NET_ERROR(FILE_NOT_FOUND, -6)
-        return callback(-6);
+        return result(-6)
       }
 
       // All other possible errors return a generic failure
       // NET_ERROR(FAILED, -2)
-      return callback(-2);
+      return result(-2)
     }
-  }, interceptCB);
+  }, interceptCB)
 }
 
-module.exports = function(pugOptions, locals) {
-  if(app.isReady()) {
-    setupPug(pugOptions, locals);
+module.exports = function (pugOptions, locals) {
+  if (app.isReady()) {
+    setupPug(pugOptions, locals)
   } else {
-    app.on('ready', () => setupPug(pugOptions, locals));
+    app.on('ready', () => setupPug(pugOptions, locals))
   }
-};
+}
