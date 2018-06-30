@@ -41,10 +41,8 @@ const getPath = url => {
  * @param {Error} error not undefined if any error happens
  */
 const interceptCB = error => {
-  if (!error) {
-    console.log('Pug interceptor registered successfully');
-  } else {
-    console.error('Pug interceptor failed:', error);
+  if (error) {
+    throw error;
   }
 }
 
