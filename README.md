@@ -25,10 +25,13 @@ const pug = require('electron-pug')({pretty: true}, locals);
 app.on('ready', () => {
   let mainWindow = new BrowserWindow({ width: 800, height: 600 });
 
-  mainWindow.loadUrl(`file://${__dirname}/index.pug`);
+  mainWindow.loadURL(`file://${__dirname}/index.pug`);
   // the rest...
 });
 ```
+
+# Endorsements
+Here is a list of all projects (known to me) who have silently endorsed this project (or its [predecessor](https://github.com/yan-foto/electron-jade)) by copying the source code without attribution: `yet-another-electron-pug`, `electron-nunjucks`, `wfo-app`, `demetra-aplikacija`, `electron-twig`, `FreeFrontiers-App`, `electron-posthtml`, and many other that I failed to track down!
 
 # Even more!
 If you want to have least effort when developing electron packages, take a look at [neutron](https://github.com/yan-foto/neutron)!
