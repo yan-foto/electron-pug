@@ -46,8 +46,7 @@ const getPath = url => {
  * @param {Object} locals pug locals
  * @returns {Promise} promise resolving to PugEmitter
  */
-const setupPug = (options = {}, locals) => (
-  new Promise((resolve, reject) => {
+const setupPug = (options = {}, locals) => {
     let emitter = new PugEmitter()
 
     protocol.interceptBufferProtocol('file', (request, result) => {
@@ -82,8 +81,7 @@ const setupPug = (options = {}, locals) => (
         emitter.emit('error', err)
         return result(errorData)
       }
-    }, err => err ? reject(err) : resolve(emitter))
-  })
-)
+    })
+}
 
 module.exports = setupPug
