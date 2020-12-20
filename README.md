@@ -25,7 +25,6 @@ const setupPug = require('electron-pug')
 app.on('ready', async () => {
   try {
     let pug = await setupPug({pretty: true}, locals)
-    pug.on('error', err => console.error('electron-pug error', err))
   } catch (err) {
     // Could not initiate 'electron-pug'
   }
